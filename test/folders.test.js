@@ -3,17 +3,17 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const mongoose = require('mongoose');
+const express = require('express');
 
 const app = require('../server');
-const { TEST_MONGODB_URI } = require('../config');
-
 const Folder = require('../models/folder');
 const seedFolders = require('../db/seed/folders');
+const { TEST_MONGODB_URI } = require('../config');
 
-const expect = chai.expect;
 chai.use(chaiHttp);
+const expect = chai.expect;
 
-describe('Noteful API - Folders', function() {
+describe.skip('Noteful API - Folders', function() {
   before(function() {
     return mongoose
       .connect(TEST_MONGODB_URI)
@@ -100,7 +100,7 @@ describe('Noteful API - Folders', function() {
         .get('/api/folders/NOT-A-VALID-ID')
         .then(res => {
           expect(res).to.have.status(400);
-          expect(res.body.message).to.eq('The `id` is not valid');
+          expect(res.body.message).to.equal('The `id` is not valid');
         });
     });
 
@@ -210,7 +210,7 @@ describe('Noteful API - Folders', function() {
         .send(updateItem)
         .then(res => {
           expect(res).to.have.status(400);
-          expect(res.body.message).to.eq('The `id` is not valid');
+          expect(res.body.message).to.equal('The `id` is not valid');
         });
     });
 
@@ -280,6 +280,16 @@ describe('Noteful API - Folders', function() {
         })
         .then(count => {
           expect(count).to.equal(0);
+        });
+    });
+
+    it('should respond with a 400 for an invalid id', function() {
+      return chai
+        .request(app)
+        .delete('/api/folders/NOT-A-VALID-ID')
+        .then(res => {
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('The `id` is not valid');
         });
     });
   });

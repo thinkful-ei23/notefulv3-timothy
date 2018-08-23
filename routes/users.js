@@ -1,14 +1,13 @@
 'use strict';
 
 const express = require('express');
-const mongoose = require('mongoose');
 
 const User = require('../models/user');
 
 const router = express.Router();
 
+/* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  // Missing field
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
@@ -18,7 +17,6 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  // Require string type
   const stringFields = ['username', 'password', 'fullname'];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
@@ -30,7 +28,13 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  // No whitespace before and after
+  // If the username and password aren't trimmed we give an error.  Users might
+  // expect that these will work without trimming (i.e. they want the password
+  // "foobar ", including the space at the end).  We need to reject such values
+  // explicitly so the users know what's happening, rather than silently
+  // trimming them and expecting the user to understand.
+  // We'll silently trim the other fields, because they aren't credentials used
+  // to log in, so it's less of a problem.
   const explicityTrimmedFields = ['username', 'password'];
   const nonTrimmedField = explicityTrimmedFields.find(
     field => req.body[field].trim() !== req.body[field]
@@ -44,7 +48,8 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  // Ensures character lengths
+  // bcrypt truncates after 72 characters, so let's not give the illusion
+  // of security by storing extra **unused** info
   const sizedFields = {
     username: { min: 1 },
     password: { min: 8, max: 72 }

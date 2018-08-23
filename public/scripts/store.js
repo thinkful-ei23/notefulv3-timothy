@@ -9,6 +9,6 @@ const store = (function() {
     currentQuery: {
       searchTerm: ''
     },
-    authToken: '' // <<== Add this
+    authToken: ''
   };
 })();
